@@ -1,3 +1,6 @@
 requests
 spidev
 python-dotenv
+azure-storage-blob
+pyodbc
+sqlalchemy
