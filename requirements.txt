@@ -3,7 +3,4 @@ spidev
 psycopg2
 python-dotenv
 azure-storage-blob
-pyodbc
-sqlalchemy
-pydantic
-azure-identity
+

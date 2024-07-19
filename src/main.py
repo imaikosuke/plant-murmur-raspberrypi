@@ -9,7 +9,6 @@ from azure_sql import PostgreSQLDatabase
 from brightness import BrightnessSensor
 
 load_dotenv()
-LINE_TOKEN = os.getenv("LINE_TOKEN")
 AZURE_BLOB_CONNECTION_STRING = os.getenv("AZURE_BLOB_CONNECTION_STRING")
 PHOTO_DIRECTORY = "/home/Pi/photos"
 AZURE_BLOB_CONTAINER_NAME = "photos"
@@ -31,7 +30,8 @@ def main():
             postgresql_db.insert_condition(int(soil_moisture_percentage))
 
             # 土壌水分が閾値以下の場合、LINE通知を送信
-            notifications.send_line_notification(LINE_TOKEN, SOIL_MOISTURE_THRESHOLD, soil_moisture_percentage)
+            if soil_moisture_percentage < SOIL_MOISTURE_THRESHOLD:
+                notifications.send_line_water_notification()
 
             # 明るさを取得
             brightness = brightness_sensor.get_brightness()
@@ -39,7 +39,7 @@ def main():
 
             # 明るさが閾値以下の場合、LINE通知を送信
             if brightness < BRIGHTNESS_THRESHOLD:
-                notifications.send_line_notification(LINE_TOKEN, BRIGHTNESS_THRESHOLD, brightness)
+                notifications.send_line_brightness_notification()
 
             # 写真を撮影し、Azure Blob Storageにアップロード
             photo_path = camera.capture_photo(PHOTO_DIRECTORY)
