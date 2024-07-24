@@ -1,30 +1,58 @@
-import spidev
+import RPi.GPIO as GPIO
 import time
 
-# 土壌湿度センサーを操作するクラス
 class SoilMoistureSensor:
-    def __init__(self, spi_channel=0, spi_device=0, max_speed_hz=1350000):
-        self.spi = spidev.SpiDev()
-        self.spi.open(spi_channel, spi_device)
-        self.spi.max_speed_hz = max_speed_hz
+    def __init__(self, clk, miso, mosi, cs):
+        self.SPICLK = clk
+        self.SPIMISO = miso
+        self.SPIMOSI = mosi
+        self.SPICS = cs
 
-    # チャンネル読み取りメソッド
+        # GPIOの初期設定
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.SPICLK, GPIO.OUT)
+        GPIO.setup(self.SPIMISO, GPIO.IN)
+        GPIO.setup(self.SPIMOSI, GPIO.OUT)
+        GPIO.setup(self.SPICS, GPIO.OUT)
+
     def read_channel(self, channel):
-        adc = self.spi.xfer2([1, (8 + channel) << 4, 0])
-        data = ((adc[1] & 3) << 8) + adc[2]
-        return data
+        if ((channel > 7) or (channel < 0)):
+            return -1
 
-    # アナログ値をパーセンテージに変換するメソッド
+        GPIO.output(self.SPICS, True)  
+        GPIO.output(self.SPICLK, False)  
+        GPIO.output(self.SPICS, False)  
+
+        command = channel
+        command |= 0x18  # Start bit + single-ended bit
+        command <<= 3    # 3ビット左シフト
+
+        for i in range(5):
+            if (command & 0x80):
+                GPIO.output(self.SPIMOSI, True)
+            else:
+                GPIO.output(self.SPIMOSI, False)
+            command <<= 1
+            GPIO.output(self.SPICLK, True)
+            GPIO.output(self.SPICLK, False)
+
+        adc_out = 0
+        for i in range(12):
+            GPIO.output(self.SPICLK, True)
+            GPIO.output(self.SPICLK, False)
+            adc_out <<= 1
+            if (GPIO.input(self.SPIMISO)):
+                adc_out |= 0x1
+
+        GPIO.output(self.SPICS, True)
+        
+        adc_out >>= 1  # 最下位ビットは不使用なのでシフト
+        return adc_out
+
     def analog_to_percentage(self, adc_value, adc_min=423, adc_max=873):
-        percentage = 100 * (adc_max - adc_value) / (adc_max - adc_min)
-        return max(0, min(percentage, 100))
+        percentage = 100 * (adc_value - adc_min) / (adc_max - adc_min)
+        return max(0, min(percentage, 100))  # 0-100%の範囲に制限
 
-    # 土壌湿度を取得するメソッド
-    def get_soil_moisture(self, channel=0, adc_min=423, adc_max=873):
-        adc_value = self.read_channel(channel)
-        percentage = self.analog_to_percentage(adc_value, adc_min, adc_max)
-        return percentage
+    def cleanup(self):
+        GPIO.cleanup()
 
-    # SPI接続を閉じるメソッド
-    def close(self):
-        self.spi.close()
