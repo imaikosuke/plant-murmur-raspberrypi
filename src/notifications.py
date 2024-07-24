@@ -18,7 +18,7 @@ def send_line_water_notification():
     if response.status_code != 200:
         print(f"Error sending notification: {response.status_code}, {response.text}")
 
-def send_line_brightness_notification(token):
+def send_line_brightness_notification():
     brightness_messages = ["暗いよ～", "もう少し明るくして～", "明るくして～", "もう暗いよ", "もう薄暗いよ～", "真っ暗でこわいぃ"]
     message = brightness_messages[random.randint(0, 5)]
     headers = {
