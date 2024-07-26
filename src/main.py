@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
 from time import sleep
-import notifications
-import camera
-from soil_moisture import SoilMoistureSensor
-from azure_storage import AzureBlobStorage
-from azure_sql import PostgreSQLDatabase
-from brightness import BrightnessSensor
+import notification.notification as notification
+import sensor.camera as camera
+from sensor.soil_moisture import SoilMoistureSensor
+from sensor.brightness import BrightnessSensor
+from azure.blob_storage import AzureBlobStorage
+from azure.postgresql_database import PostgreSQLDatabase
 
 load_dotenv()
 AZURE_BLOB_CONNECTION_STRING = os.getenv("AZURE_BLOB_CONNECTION_STRING")
@@ -37,7 +37,7 @@ def main():
             # 土壌水分が閾値以下の場合、LINE通知を送信
             if soil_moisture_percentage < SOIL_MOISTURE_THRESHOLD:
                 if not soil_moisture_notified:
-                    notifications.send_line_water_notification()
+                    notification.send_line_water_notification()
                     soil_moisture_notified = True
             else:
                 soil_moisture_notified = False
@@ -49,7 +49,7 @@ def main():
             # 明るさが閾値以下の場合、LINE通知を送信
             if brightness < BRIGHTNESS_THRESHOLD:
                 if not brightness_notified:
-                    notifications.send_line_brightness_notification()
+                    notification.send_line_brightness_notification()
                     brightness_notified = True
             else:
                 brightness_notified = False
@@ -69,7 +69,7 @@ def main():
         print("Program terminated.")
     finally:
         sensor.cleanup()
-        brightness_sensor.close()
+        brightness_sensor.cleanup()
 
 if __name__ == "__main__":
     main()
