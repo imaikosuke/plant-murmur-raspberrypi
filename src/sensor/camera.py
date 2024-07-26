@@ -1,7 +1,7 @@
 import subprocess
 import datetime
 
-# 現在の日時をファイル名にした写真を指定したディレクトリに保存
+# 現在の日時をファイル名にした写真をローカルに保存してファイルパスを返す関数
 def capture_photo(photo_directory):
     now = datetime.datetime.today()
     

@@ -1,11 +1,13 @@
 from azure.storage.blob import BlobServiceClient
 import os
 
+# Azure Blob Storageにファイルをアップロードするクラス
 class AzureBlobStorage:
     def __init__(self, connection_string, container_name):
         self.blob_service_client = BlobServiceClient.from_connection_string(connection_string)
         self.container_client = self.blob_service_client.get_container_client(container_name)
 
+    # 写真ファイルをAzure Blob Storageにアップロードするメソッド
     def upload_file(self, file_path):
         try:
             file_name = os.path.basename(file_path)
