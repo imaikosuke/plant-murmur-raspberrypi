@@ -7,12 +7,14 @@ class BrightnessSensor:
         self.mosipin = mosipin
         self.misopin = misopin
         self.cspin = cspin
+        self.pin_initilized = False
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.clockpin, GPIO.OUT)
         GPIO.setup(self.mosipin, GPIO.OUT)
         GPIO.setup(self.misopin, GPIO.IN)
         GPIO.setup(self.cspin, GPIO.OUT)
+        self.pin_initilized = True
 
     def readadc(self, adcnum):
         if adcnum > 7 or adcnum < 0:
@@ -49,4 +51,5 @@ class BrightnessSensor:
         return maxVal
 
     def close(self):
-        GPIO.cleanup()
+        if self.pin_initilized:
+            GPIO.cleanup()
