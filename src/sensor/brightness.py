@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
 
+# 照度センサーの値を取得するクラス
 class BrightnessSensor:
     def __init__(self, clockpin, mosipin, misopin, cspin):
         self.clockpin = clockpin
@@ -16,6 +17,7 @@ class BrightnessSensor:
         GPIO.setup(self.cspin, GPIO.OUT)
         self.pin_initilized = True
 
+    # MCP3008からデータを読み取るメソッド
     def readadc(self, adcnum):
         if adcnum > 7 or adcnum < 0:
             return -1
@@ -23,8 +25,8 @@ class BrightnessSensor:
         GPIO.output(self.clockpin, GPIO.LOW)
         GPIO.output(self.cspin, GPIO.LOW)
         commandout = adcnum
-        commandout |= 0x18  # スタートビット＋シングルエンドビット
-        commandout <<= 3    # LSBから8ビット目を送信するようにする
+        commandout |= 0x18
+        commandout <<= 3
         for i in range(5):
             if commandout & 0x80:
                 GPIO.output(self.mosipin, GPIO.HIGH)
@@ -43,6 +45,7 @@ class BrightnessSensor:
         GPIO.output(self.cspin, GPIO.HIGH)
         return adcout
 
+    # ３つの照度センサー値の最大値を取得するメソッド
     def get_brightness(self):
         inputVal0 = self.readadc(0)
         inputVal1 = self.readadc(1)
@@ -50,6 +53,7 @@ class BrightnessSensor:
         maxVal = max(inputVal0, inputVal1, inputVal2)
         return maxVal
 
-    def close(self):
+    # GPIOのクリーンアップ
+    def cleanup(self):
         if self.pin_initilized:
             GPIO.cleanup()
