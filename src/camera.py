@@ -13,5 +13,7 @@ def capture_photo(photo_directory):
     result = subprocess.run(args, capture_output=True, text=True)
     if result.returncode != 0:
         print("Error capturing photo:", result.stderr)
+        return None
     else:
         print("Photo captured:", filepath)
+        return filepath
