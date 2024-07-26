@@ -21,6 +21,10 @@ def main():
     azure_blob_storage = AzureBlobStorage(AZURE_BLOB_CONNECTION_STRING, AZURE_BLOB_CONTAINER_NAME)
     postgresql_db = PostgreSQLDatabase()
 
+    # 通知フラグの初期化
+    soil_moisture_notified = False
+    brightness_notified = False
+
     try:
         while True:
             adc_value = sensor.read_channel(1)
@@ -32,7 +36,11 @@ def main():
 
             # 土壌水分が閾値以下の場合、LINE通知を送信
             if soil_moisture_percentage < SOIL_MOISTURE_THRESHOLD:
-                notifications.send_line_water_notification()
+                if not soil_moisture_notified:
+                    notifications.send_line_water_notification()
+                    soil_moisture_notified = True
+            else:
+                soil_moisture_notified = False
 
             # 明るさを取得
             brightness = brightness_sensor.get_brightness()
@@ -40,7 +48,11 @@ def main():
 
             # 明るさが閾値以下の場合、LINE通知を送信
             if brightness < BRIGHTNESS_THRESHOLD:
-                notifications.send_line_brightness_notification()
+                if not brightness_notified:
+                    notifications.send_line_brightness_notification()
+                    brightness_notified = True
+            else:
+                brightness_notified = False
 
             # 写真を撮影し、Azure Blob Storageにアップロード
             photo_path = camera.capture_photo(PHOTO_DIRECTORY)
