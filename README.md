@@ -11,6 +11,11 @@
 - SEN0193（土壌水分センサ）
 - CdSセル（照度センサ）
 - Logicool C270n HDウェブカメラ
+- MCP3208
+
+## 回路図
+回路図は以下の通りです（fritzingで作成）：
+![回路図](./images/plant-murmur-schematic.png "植物のつぶやきの回路図")
 
 ## インストール手順
 1. リポジトリをクローンします:
